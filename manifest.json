@@ -1,0 +1,96 @@
+{
+  "name": "my-list",
+  "vendor": "acaplanetqa",
+  "version": "0.0.1",
+  "title": "My List - Handler",
+  "description": "Create your own product list",
+  "categories": [],
+  "dependencies": {},
+  "builders": {
+    "node": "6.x",
+    "docs": "0.x"
+  },
+  "billingOptions": {
+    "termsURL": "https://compliance.vtex.com/gdpr/policies/vtex-privacy-policy",
+    "support": {
+      "url": "https://support.vtex.com/hc/requests"
+    },
+    "free": true
+  },
+  "scripts": {},
+  "credentialType": "absolute",
+  "policies": [
+    {
+      "name": "ADMIN_DS"
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.vtex.com",
+        "path": "*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.myvtex.com",
+        "path": "*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "portal.vtexcommercestable.com.br",
+        "path": "*"
+      }
+    },
+    {
+      "name": "colossus-fire-event"
+    },
+    {
+      "name": "ADMIN_DS"
+    },
+    {
+      "name": "AcessaTodosCarrinhos"
+    },
+    {
+      "name": "AcessaTodosPedidos"
+    },
+    {
+      "name": "OMSViewer"
+    },
+    {
+      "name": "vbase-read-write"
+    }
+  ],
+  "settingsSchema": {
+    "title": "My List - Handler Settings",
+    "type": "object",
+    "properties": {
+      "Vtex_Settings": {
+        "title": "Vtex settings:",
+        "type": "object",
+        "properties": {
+          "Auth": {
+            "title": "Credentials",
+            "type": "object",
+            "properties": {
+              "Credential": {
+                "title": "Inbound AppKey:AppToken semicolon separated AppToken sha-512)",
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
+}

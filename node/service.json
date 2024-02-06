@@ -1,0 +1,22 @@
+{
+  "memory": 256,
+  "ttl": 60,
+  "timeout": 40,
+  "minReplicas": 30,
+  "maxReplicas": 100,
+  "workers": 4,
+  "events": {
+    "onAppInstalled": {
+      "sender": "apps",
+      "keys": [
+        "setup"
+      ]
+    }
+  },
+  "routes": {
+    "test": {
+      "path": "/app/test",
+      "public": true
+    }
+  }
+}
