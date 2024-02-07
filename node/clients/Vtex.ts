@@ -1,7 +1,7 @@
 import { CacheLayer, InstanceOptions, IOContext, IOResponse, JanusClient } from "@vtex/api";
 
-import { stringify, wait } from "../utils/functions";
 import { Order } from "../typings/order";
+import { stringify, wait } from "../utils/functions";
 
 
 export default class Vtex extends JanusClient {
@@ -16,7 +16,7 @@ export default class Vtex extends JanusClient {
     super(context, options);
     this.MAX_TIME = 250;
     this.MAX_TIME_ASYNC = 1500;
-    this.MAX_RETRY = 5;
+    this.MAX_RETRY = 0;
     this.memoryCache = options && options?.memoryCache;
   }
 
@@ -27,8 +27,8 @@ export default class Vtex extends JanusClient {
       } else {
         this.http.getRaw(`/api/catalog_system/pvt/sku/stockkeepingunitbyid/${skuId}`)
           .then(res => {
-            this.memoryCache?.set(this.context.account + "-skuContext-" + skuId, res.data);
-            resolve(res.data);
+            this.memoryCache?.set(this.context.account + "-skuContext-" + skuId, res);
+            resolve(res);
           })
           .catch(async (err) => {
             if (retry < this.MAX_RETRY) {
@@ -76,6 +76,90 @@ export default class Vtex extends JanusClient {
             }
           })
       }
+    })
+  }
+
+  public async searchDocumentV2(dataEntityName: string, fields: string = "all", queryParams: string | null = null, retry: number = 0): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+
+      this.http.get(`/api/dataentities/${dataEntityName}/search?_fields=${fields}` + ((queryParams) ? ("&" + queryParams) : ""))
+        .then(res => {
+
+          resolve(res);
+        })
+        .catch(async (err) => {
+
+         if(err.response.data.Message == "Field 'email' not found in schema"){
+          resolve({existent: false})
+         }
+
+          console.log("err:", err.response)
+
+          if (retry < this.MAX_RETRY) {
+            await wait(this.MAX_TIME);
+            return this.searchDocumentV2(dataEntityName, fields, queryParams, retry + 1).then(res0 => resolve(res0)).catch(err0 => reject(err0));
+          } else {
+            reject({ msg: `Error while retrieving data (dataEntity: ${dataEntityName}) --details: ${stringify(err)}` });
+          }
+        })
+
+    })
+  }
+
+  public async createDocumentV2(dataEntityName: string, schema: string = "v1", data: any, retry: number = 0): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+
+      this.http.put(`/api/dataentities/${dataEntityName}/documents?_schema=${schema}`, data)
+        .then((res: any) => {
+
+          resolve(res);
+        })
+        .catch(async (err) => {
+
+          if (err.response.statusText == "Not Modified") {
+            resolve(true)
+
+          } else {
+
+            if (retry < this.MAX_RETRY) {
+              wait(this.MAX_TIME);
+              return this.createDocumentV2(dataEntityName, schema, data, retry + 1).then(res0 => resolve(res0)).catch(err0 => reject(err0));
+            } else {
+              reject({ msg: `Error while retrieving data (dataEntity: ${dataEntityName}) --details: ${stringify(err.response)}` });
+            }
+          }
+        })
+
+    })
+  }
+
+  public async updateDocumentV2(dataEntityName: string, documentId: string, data: any, retry: number = 0): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+
+      this.http.patch(`/api/dataentities/${dataEntityName}/documents/${documentId}`, data)
+        .then((res: any) => {
+
+          resolve(res);
+        })
+        .catch(async (err) => {
+
+        console.log("err:", err.response)
+
+
+          if (err.response.statusText == "Not Modified") {
+            resolve(true)
+
+          } else {
+
+            if (retry < this.MAX_RETRY) {
+              wait(this.MAX_TIME);
+              return this.createDocumentV2(dataEntityName, documentId, data, retry + 1).then(res0 => resolve(res0)).catch(err0 => reject(err0));
+            } else {
+              reject({ msg: `Error while retrieving data (dataEntity: ${dataEntityName}) --details: ${stringify(err.response)}` });
+            }
+          }
+        })
+
     })
   }
 

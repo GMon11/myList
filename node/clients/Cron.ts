@@ -12,7 +12,7 @@ export default class Cron extends ExternalClient {
   constructor(context: IOContext, options?: InstanceOptions) {
     options!.headers = { ...options?.headers, ...{ VtexIdclientAutCookie: context.authToken } }
     super(`http://${context.account}.vtexcommercestable.com.br`, context, options);
-    this.pingUrl = `https://${this.context.workspace}--${this.context.account}.myvtex.com/_v/private/app/fareye/ping`;
+    this.pingUrl = `https://${this.context.workspace}--${this.context.account}.myvtex.com/_v/private/app/mylist/ping`;
     this.pingMethod = `POST`;
   }
 

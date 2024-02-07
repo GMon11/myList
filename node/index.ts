@@ -14,6 +14,8 @@ import { initLogger } from './middlewares/initLogger';
 import { ping } from './middlewares/ping';
 import { AppSettings } from './typings/config';
 import { CustomLogger } from './utils/Logger';
+import { checkRequest } from './middlewares/checkRequest';
+import { getFacets } from './middlewares/getFacets';
 
 //import { antiThrottler } from './middlewares/antiThrottler';
 
@@ -47,6 +49,10 @@ declare global {
   interface State extends RecorderState {
     appSettings: AppSettings
     logger: CustomLogger
+    request: {
+      email: string,
+      skuId: string
+    }
   }
 }
 
@@ -62,7 +68,11 @@ export default new Service({
       POST: [initLogger, ping]
     }),
     createList: method({
-      GET: [createList]
+      POST: [checkRequest, createList]
+    }),
+    getFacets: method({
+      GET: [checkRequest, getFacets]
     })
+
   }
 })

@@ -1,7 +1,7 @@
 {
-  "name": "my-list",
-  "vendor": "acaplanetqa",
-  "version": "0.0.1",
+  "name": "mylist",
+  "vendor": "arcaplanetqa",
+  "version": "0.0.1-beta.0",
   "title": "My List - Handler",
   "description": "Create your own product list",
   "categories": [],
@@ -35,6 +35,13 @@
       "attrs": {
         "host": "{{account}}.myvtex.com",
         "path": "*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.vtex.com",
+        "path": "/dataentities/*"
       }
     },
     {

@@ -1,8 +1,8 @@
-import { SECONDARY_BUCKET_FAREYE, maxRetry, maxWaitTime } from "./constants"
+import { SECONDARY_BUCKET, maxRetry, maxWaitTime } from "./constants"
 import { stringify, wait } from "./functions"
 
-export async function saveObjInVbase(ctx: Context | OrderEvent, bucket: string, path: any, data: any, retry: number = 0): Promise<any> {
-  bucket == SECONDARY_BUCKET_FAREYE
+export async function saveObjInVbase(ctx: Context , bucket: string, path: any, data: any, retry: number = 0): Promise<any> {
+  bucket == SECONDARY_BUCKET
 
   return new Promise<any>((resolve, reject) => {
     ctx.clients.vbase.saveJSON(bucket, path, data)
@@ -18,7 +18,7 @@ export async function saveObjInVbase(ctx: Context | OrderEvent, bucket: string, 
   })
 }
 
-export async function getObjFromVbase(ctx: Context | OrderEvent, bucket: string, path: string, retry: number = 0): Promise<any> {
+export async function getObjFromVbase(ctx: Context , bucket: string, path: string, retry: number = 0): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     ctx.clients.vbase.getJSON(bucket, path, true)
       .then(res => resolve(res))
@@ -33,7 +33,7 @@ export async function getObjFromVbase(ctx: Context | OrderEvent, bucket: string,
   })
 }
 
-export async function deleteObjFromVbase(ctx: Context | OrderEvent, bucket: string, path: string, retry: number = 0): Promise<any> {
+export async function deleteObjFromVbase(ctx: Context , bucket: string, path: string, retry: number = 0): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     ctx.clients.vbase.deleteFile(bucket, path)
       .then(res => resolve(res))

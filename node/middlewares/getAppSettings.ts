@@ -1,7 +1,7 @@
 
 import { APP } from "@vtex/api";
 import { maxRetry, maxWaitTime } from "../utils/constants";
-import { routeToLabel, stringify, wait } from "../utils/functions";
+import { stringify, wait } from "../utils/functions";
 import { cleanUpAntiThrottler } from "./antiThrottler";
 import { AppSettings } from "../typings/config";
 
@@ -11,8 +11,7 @@ export async function getAppSettings(ctx: Context, next: () => Promise<any>) {
     //set up of process environment variables, in order to pass information to clients
     await next();
   } catch (err) {
-    let label = routeToLabel(ctx);
-    ctx.state.logger.error(`${label} ${err.msg}`);
+    ctx.state.logger.error(`${err.msg}`);
     (ctx as Context).status = 500;
     (ctx as Context).body = "Internal Server Error";
     cleanUpAntiThrottler(ctx);

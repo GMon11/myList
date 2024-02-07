@@ -1,8 +1,8 @@
-import { maxRetry, maxWaitTime } from "./constants"
 import { Pagination } from "../typings/md_entities";
+import { maxRetry, maxWaitTime } from "./constants"
 import { stringify, wait } from "./functions";
 
-export async function createDocument(ctx: Context | OrderEvent, dataEntity: string, fields: any, retry: number = 0): Promise<any> {
+export async function createDocument(ctx: Context , dataEntity: string, fields: any, retry: number = 0): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     ctx.clients.masterdata.createDocument({ dataEntity: dataEntity, fields: fields })
       .then((res: any) => {
@@ -19,7 +19,7 @@ export async function createDocument(ctx: Context | OrderEvent, dataEntity: stri
   })
 }
 
-export async function getDocument(ctx: Context | OrderEvent, dataEntity: string, id: string, fields: any, retry: number = 0): Promise<any> {
+export async function getDocument(ctx: Context , dataEntity: string, id: string, fields: any, retry: number = 0): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     ctx.clients.masterdata.getDocument({ dataEntity: dataEntity, id: id, fields: fields })
       .then((res: any) => {
@@ -36,7 +36,7 @@ export async function getDocument(ctx: Context | OrderEvent, dataEntity: string,
   })
 }
 
-export async function updatePartialDocument(ctx: Context | OrderEvent, dataEntity: string, id: string, fields: any, retry: number = 0): Promise<any> {
+export async function updatePartialDocument(ctx: Context , dataEntity: string, id: string, fields: any, retry: number = 0): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     ctx.clients.masterdata.updatePartialDocument({ dataEntity: dataEntity, id: id, fields: fields })
       .then((res: any) => {
@@ -53,7 +53,7 @@ export async function updatePartialDocument(ctx: Context | OrderEvent, dataEntit
   })
 }
 
-export async function searchDocuments(ctx: Context | OrderEvent, dataEntity: string, fields: string[], where: string, pagination: Pagination, retryIfNotFoundRecord: boolean = false, retry: number = 0): Promise<any[]> {
+export async function searchDocuments(ctx: Context , dataEntity: string, fields: string[], where: string, pagination: Pagination, retryIfNotFoundRecord: boolean = false, retry: number = 0): Promise<any[]> {
   return new Promise<any[]>((resolve, reject) => {
     ctx.clients.masterdata.searchDocuments({ dataEntity: dataEntity, fields: fields, where: where, pagination: pagination })
       .then(async (res: any) => {
@@ -76,7 +76,7 @@ export async function searchDocuments(ctx: Context | OrderEvent, dataEntity: str
   })
 }
 
-export async function scrollDocuments(ctx: Context | OrderEvent, dataEntity: string, fields: string[], where: string, output: any[] = [], token: string | undefined = undefined, size: number = 1000, retry: number = 0): Promise<any[]> {
+export async function scrollDocuments(ctx: Context , dataEntity: string, fields: string[], where: string, output: any[] = [], token: string | undefined = undefined, size: number = 1000, retry: number = 0): Promise<any[]> {
   return new Promise<any[]>((resolve, reject) => {
     ctx.clients.masterdata.scrollDocuments({ dataEntity: dataEntity, fields: fields, where, mdToken: token, size: size })
       .then((res: any) => {
@@ -99,7 +99,7 @@ export async function scrollDocuments(ctx: Context | OrderEvent, dataEntity: str
   })
 }
 
-export async function deleteDocument(ctx: Context | OrderEvent, dataEntity: string, id: string, retry: number = 0): Promise<any> {
+export async function deleteDocument(ctx: Context , dataEntity: string, id: string, retry: number = 0): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     ctx.clients.masterdata.deleteDocument({ dataEntity: dataEntity, id: id })
       .then((res: any) => {

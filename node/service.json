@@ -14,8 +14,16 @@
     }
   },
   "routes": {
-    "test": {
-      "path": "/app/test",
+    "createList": {
+      "path": "/app/create/list",
+      "public": true
+    },
+    "getFacets": {
+      "path": "/app/retrieve/facets/:email",
+      "public": true
+    },
+    "ping": {
+      "path": "/_v/private/app/mylist/ping",
       "public": true
     }
   }
