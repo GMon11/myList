@@ -16,6 +16,9 @@ import { AppSettings } from './typings/config';
 import { CustomLogger } from './utils/Logger';
 import { checkRequest } from './middlewares/checkRequest';
 import { getFacets } from './middlewares/getFacets';
+import { getProducts } from './middlewares/getProducts';
+import { removeProducts } from './middlewares/removeProducts';
+
 
 //import { antiThrottler } from './middlewares/antiThrottler';
 
@@ -71,7 +74,13 @@ export default new Service({
       POST: [checkRequest, createList]
     }),
     getFacets: method({
-      GET: [checkRequest, getFacets]
+      POST: [ getFacets]
+    }),
+    getProducts: method({
+      POST: [getProducts]
+    }),
+    removeProducts: method({
+      DELETE: [removeProducts]
     })
 
   }

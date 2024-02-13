@@ -93,7 +93,6 @@ export default class Vtex extends JanusClient {
           resolve({existent: false})
          }
 
-          console.log("err:", err.response)
 
           if (retry < this.MAX_RETRY) {
             await wait(this.MAX_TIME);
@@ -158,6 +157,28 @@ export default class Vtex extends JanusClient {
               reject({ msg: `Error while retrieving data (dataEntity: ${dataEntityName}) --details: ${stringify(err.response)}` });
             }
           }
+        })
+
+    })
+  }
+
+  public async deleteDocumentV2(dataEntityName: string, documentId: string, retry: number = 0): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+
+      this.http.delete(`/api/dataentities/${dataEntityName}/documents/${documentId}`)
+        .then((res: any) => {
+
+          resolve(res);
+        })
+        .catch(async (err) => {
+
+            if (retry < this.MAX_RETRY) {
+              wait(this.MAX_TIME);
+              return this.deleteDocumentV2(dataEntityName, documentId, retry + 1).then(res0 => resolve(res0)).catch(err0 => reject(err0));
+            } else {
+              reject({ msg: `Error while deleting data (dataEntity: ${dataEntityName}) --details: ${stringify(err.response)}` });
+            }
+
         })
 
     })

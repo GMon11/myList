@@ -48,4 +48,20 @@ export function getHoursDelayedDate(hoursDelay: number) {
   return isoDate
 }
 
+export function getLocalDateTime(timeZone: string): Date {
+
+  let currentDate = new Date().toLocaleDateString("it-IT", { timeZone: timeZone });
+  let currentTime = new Date().toLocaleTimeString("it-IT", { timeZone: timeZone });
+
+  let splittedDate = currentDate.split("/");
+  splittedDate[1] = parseInt(splittedDate[1]) < 10 ? ("0" + splittedDate[1]) : (splittedDate[1]);
+  splittedDate[0] = parseInt(splittedDate[0]) < 10 ? ("0" + splittedDate[0]) : (splittedDate[0]);
+
+  let formattedDate = `${splittedDate[2]}-${splittedDate[1]}-${splittedDate[0]}T${currentTime}`;
+
+  let currentDateTime = new Date(formattedDate);
+
+  return currentDateTime
+
+}
 

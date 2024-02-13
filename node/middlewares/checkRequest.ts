@@ -12,7 +12,7 @@ export async function checkRequest(ctx: Context, next: () => Promise<any>) {
 
     switch (ctx.vtex.route.id) {
       case ROUTE.CREATE_LIST:
-        if (!isValid(ctx.state.request) || !isValid(ctx.state.request.email) || !isValid(ctx.state.request.skuId)) {
+        if (!isValid(ctx.state.request) ||  !isValid(ctx.state.request.skuId)) {
           throw new Error("#notValidRequest")
         }
         await next()

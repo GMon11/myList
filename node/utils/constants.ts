@@ -16,6 +16,12 @@ export enum ROUTE {
 }
 
 export const LIST_ENTITY = "prova" //tbm
-export const LIST_FIELDS = "id,name,email,category1,category2"
+export const LIST_FIELDS = "id,name,email,category1,category2,insertionDate"
 
 export const ALLOWED_FACETS = ["category1", "category2"]
+
+export enum TimeZone {
+  Rome = 'Europe/Rome'
+}
+
+export const MONTH_NAMES_IT = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]

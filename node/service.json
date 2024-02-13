@@ -15,11 +15,19 @@
   },
   "routes": {
     "createList": {
-      "path": "/app/create/list",
+      "path": "/app/add/products/:email",
       "public": true
     },
     "getFacets": {
       "path": "/app/retrieve/facets/:email",
+      "public": true
+    },
+    "getProducts": {
+      "path": "/app/retrieve/products/:email",
+      "public": true
+    },
+    "removeProducts": {
+      "path": "/app/remove/products/:email",
       "public": true
     },
     "ping": {
