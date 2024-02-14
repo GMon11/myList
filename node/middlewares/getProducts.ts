@@ -1,86 +1,57 @@
-import { json } from "co-body";
 import { LIST_ENTITY, LIST_FIELDS } from "../utils/constants";
+import { getProductsList } from "../utils/listFunctions";
 
 
 export async function getProducts(ctx: Context, next: () => Promise<any>) {
   try {
 
-    let request = await json(ctx.req);
-
-    let pathVariables = ctx.vtex.route.params;
 
 
-    let list = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${pathVariables.email}`)
-
-
-    console.log("list:", JSON.stringify(list, null, 2))
-
-    let products: any = []
-
-    if (request.selectedFacets.length > 0) {
-
-
-      request.selectedFacets.forEach((facet: any) => {
-
-        //aggiungere check sulla validità della key
-
-        let fProducts = getFilteredProducts(facet, list)
-        if (fProducts && fProducts.length > 0) {
-          products.push(fProducts)
-        }
-        if(products.length > 1){
-          products = products[0].filter((x:any) => products[1].includes(x))
-        }
-      });
-
-      products = (Array.isArray(products[0])) ? products[0] : products
-
-    } else {
-      products.push(list[0].skuIds)
+    let list = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${ctx.state.request.listId}`)
+    if (list.existent == false) {
+      throw new Error("#notExistentList")
     }
 
-    console.log("products:", products)
+
+    let products: any = getProductsList(ctx.state.request.selectedFacets, list)
 
     ctx.status = 200;
     ctx.body = {
-      products: {
-        pageInfo: {
-          totalCount: products.length
-        },
-        edges: products
-      }
+      data: {
+        products: {
+          pageInfo: {
+            totalCount: products.length
+          },
+          edges: products
+        }
+      },
+      errors: null
     }
 
 
     await next();
 
-  } catch (err) {
+  } catch (error) {
 
-    console.log("err:", err)
+    if (error.message == "#notExistentList") {
+      ctx.status = 400;
+      ctx.body = {
+        data: null,
+        errors: [error.message]
+      };
+    } else {
+      ctx.status = 500;
+      ctx.body = {
+        data: null,
+        errors: [(error)]
+      };
+    }
 
-    ctx.status = 500;
   }
 }
 
-export function getFilteredProducts(facet: any, list: any) {
-
-  console.log("facet:", facet)
-
-  let filteredProducts: any = []
-
-  if (list[0][facet.key]) {
 
 
-    list[0][facet.key].forEach((item: any) => {
-      if (item.label == facet.value) {
-        item.skuIds.forEach((skuId: any) => {
-          filteredProducts.push(skuId)
-        });
-      }
-    });
-  }
 
-  return filteredProducts;
 
-}
 

@@ -12,11 +12,12 @@ export const LOGGER_ENTITY = "LC"
 
 export enum ROUTE {
   CREATE_LIST = "createList",
-  FETCH_FACETS = "getFacets"
+  FETCH_FACETS = "getFacets",
+  FETCH_PRODUCTS = "getProducts"
 }
 
 export const LIST_ENTITY = "prova" //tbm
-export const LIST_FIELDS = "id,name,email,category1,category2,insertionDate"
+export const LIST_FIELDS = "id,name,email,category1,category2,insertionDate,skuIds"
 
 export const ALLOWED_FACETS = ["category1", "category2"]
 

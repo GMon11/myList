@@ -1,21 +1,16 @@
-import { json } from "co-body";
 import { LIST_ENTITY, LIST_FIELDS, MONTH_NAMES_IT, TimeZone } from "../utils/constants";
 import { getLocalDateTime } from "../utils/functions";
+import { getProductsList } from "../utils/listFunctions";
 
 
 export async function getFacets(ctx: Context, next: () => Promise<any>) {
 
   try {
 
-    let request = await json(ctx.req);
 
-    console.log("request:", request)
 
-    let pathVariables = ctx.vtex.route.params;
 
-    //da implementare il check sui filtri già selezionati e fare il match ritornando solo gli stessi
-
-    let list = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${pathVariables.email}`)
+    let list = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${ctx.state.request.listId}`)
 
     if (list.existent == false) {
       throw new Error("#notExistentList")
@@ -23,45 +18,46 @@ export async function getFacets(ctx: Context, next: () => Promise<any>) {
 
     let facets: any = []
 
-    let category1SelectedFacet: any = []
-    let category2SelectedFacet: any = []
+    let products: any = getProductsList(ctx.state.request.selectedFacets, list)
 
+    let allFacets = [
+      { key: "category1", label: "Animale" },
+      { key: "category2", label: "Tipo di prodotto" },
+      { key: "insertionDate", label: "Data di aggiunta" }] //by appsettings
 
-    if (request.selectedFacets.length > 0) {
+    list[0].insertionDate = mapDate(list[0])
 
-      request.selectedFacets.forEach((el: any) => {
+    let facetKeys: any = []
+    allFacets.forEach((facet: any) => {
 
-        if (el.key == "category1") {
-          category1SelectedFacet.push({
-            el,
-            categoryId: list[0].category1.find((element: any) => element.label == el.value).categoryId
+      let included = false;
+      ctx.state.request.selectedFacets?.forEach((selectedFacet: any) => {
 
+        if (selectedFacet.key == facet.key && !facetKeys.includes(selectedFacet.key)) {
+          facetKeys.push(selectedFacet.key)
+
+          let values = getAllValues(facet.key, list[0], selectedFacet)
+          facets.push({
+            label: facet.label,
+            values: values
           })
-        } else if (el.key == "category2") {
-          category2SelectedFacet.push({
-            el,
-            fatherCategoryId: list[0].category2.find((element: any) => element.label == el.value).fatherCategoryId
-          })
+
+          included = true;
         }
-      });
-    }
 
-    //standard facet
-    let categories = getCategoriesFacet(list[0], "Animale", "Tipo di prodotto", category1SelectedFacet, category2SelectedFacet)
-
-    console.log("categories:", categories.allSkus)
-
-    let dateFacet = getDateFacet(list[0], categories.allSkus)
-
-    facets.push(categories.category1)
-    facets.push(categories.category2)
-    facets.push(dateFacet)
-
+      })
+      if (!included) {
+        let values = getValuesFiltered(facet.key, list[0], products)
+        facets.push({
+          label: facet.label,
+          values: values
+        })
+      }
+    })
 
     ctx.status = 200;
     ctx.body = {
-      data:
-      {
+      data: {
         facets: facets
       },
       errors: null
@@ -70,8 +66,6 @@ export async function getFacets(ctx: Context, next: () => Promise<any>) {
     await next();
 
   } catch (error) {
-
-    console.log("error:", error)
 
     if (error.message == "#notExistentList") {
       ctx.status = 400;
@@ -89,150 +83,108 @@ export async function getFacets(ctx: Context, next: () => Promise<any>) {
   }
 }
 
-export function getCategoriesFacet(categoryList: any, label1: string, label2: string, category1Facets: any, category2Facets: any) {
+function getAllValues(facet: string, list: any, selectedFacet: any) {
 
-  let cat1values: { label: string, quantity: number, isSelected: boolean }[] = []
-  let cat2values: { label: string, quantity: number, isSelected: boolean }[] = []
+  let values: any = []
 
-  let allSkus: any = []
-  let allSkusCat1: any = []
-
-
-  let skus: any = []
-  categoryList.category1.forEach((el: any) => {
-    let isSelected = false
-
-    if ((category1Facets.find((facet: any) => facet.el.value == el.label))) { isSelected = true }
-    //get values
-    cat1values = getFacetValues(cat1values, el, isSelected);
-
-    allSkusCat1 = allSkusCat1.concat(el.skuIds)
-  });
-
-
-  //get all products filtered
-
-  //get all facet
-
-  console.log("skus:", skus)
-
-
-  let category1 = {
-    label: label1,
-    values: cat1values
-  }
-
-  let allSkusCat2: any = []
-  categoryList.category2.forEach((el: any) => {
-
-    let isSelected = false
-    if ((category2Facets.find((facet: any) => facet.el.value == el.label))) { isSelected = true }
-
-    if (category1Facets.length > 0) {
-      //could be more than one
-      category1Facets.forEach((item: any) => {
-        if (item.categoryId == el.fatherCategoryId) {
-          cat2values.push({
-            label: el.label,
-            quantity: el.skuIds.length,
-            isSelected: isSelected
-          })
-          allSkusCat2 = allSkusCat2.concat(el.skuIds)
-        }
-      });
-
-    } else {
-      cat2values = getFacetValues(cat2values, el, isSelected);
-      allSkusCat2 = allSkusCat2.concat(el.skuIds)
-    }
-
-    allSkus = allSkusCat1.filter((x: any) => allSkusCat2.includes(x))
-
-    console.log("allSkus:", allSkus)
-
-  });
-
-  let category2 = {
-    label: label2,
-    values: cat2values
-  }
-
-
-
-  return { category1, category2, allSkus }
-}
-
-function getFacetValues(values: any, el: any, isSelected: boolean) {
-  let found = false;
-
-  for (let i = 0; i < values.length && found == false; i++) {
-    if (values[i].label == el.label) {
-      values[i].quantity += el.skuIds.length;
-      found = true;
-    }
-  }
-  if (!found) {
+  list[facet].forEach((value: any) => {
     values.push({
-      label: el.label,
-      quantity: el.skuIds.length,
-      isSelected: isSelected
+      quantity: value.skuIds.length,
+      label: value.label,
+      isSelected: selectedFacet.value == value.label
     })
-  }
+  });
+
   return values
 }
 
-export function getDateFacet(list: any, allSkus: any) {
+function getValuesFiltered(facet: string, list: any, products: any) {
 
+  let knownList: any = []
+  let values: any = []
 
+  products.forEach((prod: any) => {
+    if (!knownList.includes(prod)) {
 
+      let found = false
+      for (let i = 0; i < list[facet].length && found == false; i++) {
+        if (list[facet][i].skuIds.includes(prod)) {
 
-  let allDate: any = []
+          knownList = knownList.concat(list[facet][i].skuIds)
 
-  list.insertionDate.forEach((it: any) => {
-
-    let quantity = it.skuIds.filter((x: any) => allSkus.includes(x)).length
-
-    if (quantity > 0)
-      allDate.push({ date: it.date, quantity: quantity })
-  });
-
-  let months: any = []
-
-  allDate.forEach((item: any) => {
-
-
-    let month = new Date(item.date).getMonth();
-
-    let found = false;
-    for (let i = 0; i < months.length && found == false; i++) {
-      if (months[i].month == month) {
-        months[i].quantity += item.quantity;
-        found = true;
+          values.push({
+            quantity: list[facet][i].skuIds.length,
+            label: list[facet][i].label,
+            isSelected: false
+          })
+          if (facet != "insertionDate") {
+            found = true;
+          }
+        }
       }
     }
-    if (!found) {
-      months.push({
-        month: month,
-        label: MONTH_NAMES_IT[month],
-        quantity: item.quantity
-      })
-    }
-
   });
 
-  let last14day:any = []
-  let lastWeek:any = []
+  return values
+}
+
+function mapDate(list: any) {
+  let mappedDateFacet: any = []
+
+  let last14 = { label: "last14", quantity: 0, skuIds: [] }
+  let last7 = { label: "last7", quantity: 0, skuIds: [] }
 
   let currentDate = getLocalDateTime(TimeZone.Rome)
 
-  var week = new Date(currentDate);
-  week.setDate(week.getDate() - 7);
 
+  list.insertionDate.forEach((item: any) => {
+    let dbDate = new Date(item.date)
 
-  let insertionDateFacet = {
-    label: "Data",
-    values: months
+    //month facets
+    let month = dbDate.getMonth()
+
+    let found = false
+    for (let i = 0; i < mappedDateFacet.length && found == false; i++) {
+      if (mappedDateFacet[i].month == month) {
+        found = true
+        mappedDateFacet[i].skuIds.concat(item.skuIds)
+        mappedDateFacet[i].quantity += item.skuIds.length
+      }
+    }
+    if (!found) {
+      mappedDateFacet.push({
+        month: month,
+        label: MONTH_NAMES_IT[month],
+        skuIds: item.skuIds,
+        quantity: item.skuIds.length,
+
+      })
+    }
+
+    let partial = currentDate
+    partial.setDate(partial.getDate() - 14);
+
+    if (currentDate >= partial) {
+      last14.skuIds = last14.skuIds.concat(item.skuIds)
+      last14.quantity += item.skuIds.length
+    }
+
+    partial = currentDate
+    partial.setDate(partial.getDate() - 7);
+
+    if (currentDate >= partial) {
+      last7.skuIds = last7.skuIds.concat(item.skuIds)
+      last7.quantity += item.skuIds.length
+    }
+
+  });
+
+  if (last14.quantity > 1) {
+    mappedDateFacet.push(last14)
+  }
+  if (last7.quantity > 1) {
+    mappedDateFacet.push(last7)
   }
 
-  return insertionDateFacet
+  return mappedDateFacet
 }

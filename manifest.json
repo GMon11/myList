@@ -96,6 +96,47 @@
             }
           }
         }
+      },
+      "List_Settings:": {
+        "title": "List settings:",
+        "type": "object",
+        "properties": {
+          "facets": {
+            "title": "Facets",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "title": "Facet key",
+                  "type": "string"
+                },
+                "value": {
+                  "title": "Facet value",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "entity": {
+            "title": "Data entity",
+            "type": "object",
+            "properties": {
+              "name": {
+                "title": "Entity name",
+                "type": "string"
+              },
+              "schema": {
+                "title": "Schema name",
+                "type": "string"
+              },
+              "fields": {
+                "title": "Entity fields (comma separated)",
+                "type": "string"
+              }
+            }
+          }
+        }
       }
     }
   },

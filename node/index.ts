@@ -8,16 +8,16 @@ import {
 } from '@vtex/api';
 
 import { Clients } from './clients';
+import { checkRequest } from './middlewares/checkRequest';
 import { createCronJob } from './middlewares/createCronJob';
 import { createList } from './middlewares/createList';
+import { getProducts } from './middlewares/getProducts';
 import { initLogger } from './middlewares/initLogger';
 import { ping } from './middlewares/ping';
-import { AppSettings } from './typings/config';
-import { CustomLogger } from './utils/Logger';
-import { checkRequest } from './middlewares/checkRequest';
-import { getFacets } from './middlewares/getFacets';
-import { getProducts } from './middlewares/getProducts';
 import { removeProducts } from './middlewares/removeProducts';
+import { AppSettings, SelectedFacets } from './typings/config';
+import { CustomLogger } from './utils/Logger';
+import { getFacets } from './middlewares/getFacets';
 
 
 //import { antiThrottler } from './middlewares/antiThrottler';
@@ -53,8 +53,11 @@ declare global {
     appSettings: AppSettings
     logger: CustomLogger
     request: {
-      email: string,
-      skuId: string
+      skuId?: string,
+      listId?: string,
+      selectedFacets?: SelectedFacets[],
+      first?: number,
+      after?: string
     }
   }
 }
@@ -74,7 +77,7 @@ export default new Service({
       POST: [checkRequest, createList]
     }),
     getFacets: method({
-      POST: [ getFacets]
+      POST: [getFacets]
     }),
     getProducts: method({
       POST: [getProducts]

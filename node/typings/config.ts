@@ -10,3 +10,8 @@ export interface AppSettings {
   Vtex_Settings: Vtex_Settings
 }
 
+export interface SelectedFacets {
+  key: string,
+  value: string
+}
+

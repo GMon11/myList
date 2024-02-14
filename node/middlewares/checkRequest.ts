@@ -10,18 +10,20 @@ export async function checkRequest(ctx: Context, next: () => Promise<any>) {
 
     ctx.state.request = await json(ctx.req);
 
-    switch (ctx.vtex.route.id) {
-      case ROUTE.CREATE_LIST:
-        if (!isValid(ctx.state.request) ||  !isValid(ctx.state.request.skuId)) {
-          throw new Error("#notValidRequest")
-        }
-        await next()
-        break;
-
-      case ROUTE.FETCH_FACETS:
-        await next()
-        break;
+    if (ctx.vtex.route.id == ROUTE.CREATE_LIST) {
+      if (!isValid(ctx.state.request) || !isValid(ctx.state.request.skuId)) {
+        throw new Error("#notValidRequest");
+      }
+    } else if (
+      ctx.vtex.route.id == ROUTE.FETCH_FACETS ||
+      ctx.vtex.route.id == ROUTE.FETCH_PRODUCTS
+    ) {
+      if (!isValid(ctx.state.request.listId) || !isValid(ctx.state.request.selectedFacets)) {
+        throw new Error("#notValidRequest");
+      }
     }
+
+    await next()
 
   } catch (error) {
     if (error.message = '#notValidRequest') {
