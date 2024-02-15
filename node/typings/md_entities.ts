@@ -3,16 +3,24 @@ export interface Pagination {
   pageSize: number
 }
 
-export interface FBRecord {
+export interface Category_Field {
+  label: string,
+  value: string,
+  categoryId: string,
+  fatherCategoryId?: string | null,
+  skuIds: string[],
+}
+
+export interface InsertionDate {
+  date: Date | string,
+  skuIds: string[]
+}
+export interface ListRecord {
   id?: string
-  orderFormId: string
-  referenceNumber: string
-  reservationCode: string
-  carrierCode: string
-  status: string
-  creationDate: string
-  orderId?: string
-  firstAvailableSlot: string
-  selectedSlot: string
-  docId?: string
+  listId?: string
+  skuIds?: string[],
+  category1?: Category_Field[],
+  category2?: Category_Field[],
+  insertionDate?: InsertionDate[],
+  existent?: boolean
 }

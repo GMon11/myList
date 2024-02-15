@@ -1,3 +1,6 @@
+import { SelectedFacets } from "../typings/config";
+import { ListRecord } from "../typings/md_entities";
+import { Facet, FacetValue, GetFacets_Response } from "../typings/types";
 import { LIST_ENTITY, LIST_FIELDS, MONTH_NAMES_IT, TimeZone } from "../utils/constants";
 import { getLocalDateTime } from "../utils/functions";
 import { getProductsList } from "../utils/listFunctions";
@@ -7,18 +10,15 @@ export async function getFacets(ctx: Context, next: () => Promise<any>) {
 
   try {
 
+    let list: ListRecord[] = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `listId=${ctx.state.request.listId}`)
 
-
-
-    let list = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${ctx.state.request.listId}`)
-
-    if (list.existent == false) {
+    if (list[0].existent == false) {
       throw new Error("#notExistentList")
     }
 
-    let facets: any = []
+    let facets: Facet[] = []
 
-    let products: any = getProductsList(ctx.state.request.selectedFacets, list)
+    let products: string[] = getProductsList(ctx.state.request.selectedFacets!, list[0])
 
     let allFacets = [
       { key: "category1", label: "Animale" },
@@ -55,13 +55,15 @@ export async function getFacets(ctx: Context, next: () => Promise<any>) {
       }
     })
 
-    ctx.status = 200;
-    ctx.body = {
+    let response: GetFacets_Response = {
       data: {
         facets: facets
       },
       errors: null
     }
+
+    ctx.status = 200;
+    ctx.body = response;
 
     await next();
 
@@ -83,14 +85,15 @@ export async function getFacets(ctx: Context, next: () => Promise<any>) {
   }
 }
 
-function getAllValues(facet: string, list: any, selectedFacet: any) {
+function getAllValues(facet: string, list: any, selectedFacet: SelectedFacets) {
 
-  let values: any = []
+  let values: FacetValue[] = []
 
   list[facet].forEach((value: any) => {
     values.push({
       quantity: value.skuIds.length,
       label: value.label,
+      value: value.value,
       isSelected: selectedFacet.value == value.label
     })
   });
@@ -98,26 +101,27 @@ function getAllValues(facet: string, list: any, selectedFacet: any) {
   return values
 }
 
-function getValuesFiltered(facet: string, list: any, products: any) {
+function getValuesFiltered(facetKey: string, list: any, products: string[]) {
 
-  let knownList: any = []
-  let values: any = []
+  let knownList: string[] = []
+  let values: FacetValue[] = []
 
-  products.forEach((prod: any) => {
+  products.forEach((prod: string) => {
     if (!knownList.includes(prod)) {
 
       let found = false
-      for (let i = 0; i < list[facet].length && found == false; i++) {
-        if (list[facet][i].skuIds.includes(prod)) {
+      for (let i = 0; i < list[facetKey]?.length && found == false; i++) {
+        if (list[facetKey][i].skuIds.includes(prod)) {
 
-          knownList = knownList.concat(list[facet][i].skuIds)
+          knownList = knownList.concat(list[facetKey][i].skuIds)
 
           values.push({
-            quantity: list[facet][i].skuIds.length,
-            label: list[facet][i].label,
+            quantity: list[facetKey][i].skuIds.length,
+            label: list[facetKey][i].label,
+            value: list[facetKey][i].value,
             isSelected: false
           })
-          if (facet != "insertionDate") {
+          if (facetKey != "insertionDate") {
             found = true;
           }
         }
@@ -131,8 +135,8 @@ function getValuesFiltered(facet: string, list: any, products: any) {
 function mapDate(list: any) {
   let mappedDateFacet: any = []
 
-  let last14 = { label: "last14", quantity: 0, skuIds: [] }
-  let last7 = { label: "last7", quantity: 0, skuIds: [] }
+  let last14 = { label: "Ultimi 14 giorni", value: "last14", quantity: 0, skuIds: [] }
+  let last7 = { label: "Ultimi 7 giorni", value: "last7", quantity: 0, skuIds: [] }
 
   let currentDate = getLocalDateTime(TimeZone.Rome)
 
@@ -155,6 +159,7 @@ function mapDate(list: any) {
       mappedDateFacet.push({
         month: month,
         label: MONTH_NAMES_IT[month],
+        value: MONTH_NAMES_IT[month].toLowerCase(),
         skuIds: item.skuIds,
         quantity: item.skuIds.length,
 

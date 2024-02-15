@@ -1,6 +1,6 @@
-import { stringify } from "querystring";
+import { Category_Field, ListRecord } from "../typings/md_entities";
 import { LIST_ENTITY, LIST_FIELDS, TimeZone } from "../utils/constants";
-import { getLocalDateTime, wait } from "../utils/functions";
+import { getLocalDateTime } from "../utils/functions";
 
 export async function createList(ctx: Context, next: () => Promise<any>) {
 
@@ -10,49 +10,43 @@ export async function createList(ctx: Context, next: () => Promise<any>) {
 
     let categories = skuContext.data.ProductCategories;
     let catIds = Object.keys(categories)
-    let catNames: any = []
+    let catNames: string[] = []
     catIds.forEach(item => {
       catNames.push(categories[item])
     })
 
-    let res = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${ctx.vtex.route.params.email}`)
+    let list: ListRecord[] = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `listId=${ctx.state.request.listId}`)
 
 
-    console.log("res:", res)
+    console.log("res:", list)
 
-    if (res.existent == false) {
+    if (list[0].existent == false) {
       //create new list
       let currentDate = getLocalDateTime(TimeZone.Rome);
 
-      let payload = {
-        email: ctx.state.request.listId,
-        skuIds: [ctx.state.request.skuId],
-        category1: [{ label: catNames[0], categoryId: catIds[0], skuIds: [ctx.state.request.skuId] }],
-        category2: [{ label: catNames[1], categoryId: catIds[1], fatherCategoryId: catIds[0], skuIds: [ctx.state.request.skuId] }],
-        insertionDate: [{ date: currentDate, skuIds: [ctx.state.request.skuId] }]
+      let payload: ListRecord = {
+        listId: ctx.state.request.listId!,
+        skuIds: [ctx.state.request.skuId!],
+        category1: [{ label: catNames[0], value: catNames[0].toLowerCase().replaceAll(" ", "-"), categoryId: catIds[0], skuIds: [ctx.state.request.skuId!] }],
+        category2: [{ label: catNames[1], value: catNames[0].toLowerCase().replaceAll(" ", "-"), categoryId: catIds[1], fatherCategoryId: catIds[0], skuIds: [ctx.state.request.skuId!] }],
+        insertionDate: [{ date: currentDate, skuIds: [ctx.state.request.skuId!] }]
       }
 
-      let res3 = await ctx.clients.Vtex.createDocumentV2(LIST_ENTITY, "prova", payload)
-
-      console.log("res3:", res3)
+      await ctx.clients.Vtex.createDocumentV2(LIST_ENTITY, "prova", payload)
 
 
     } else {
 
       //update the existent one
-      let skuIds_Update = updateAllSkuIds(res[0].skuIds, ctx.state.request.skuId!);
-
-      console.log("skuIds_Update:", skuIds_Update)
-
-      let category1_Update = updateCategoryFacet(res[0].category1, catIds, catNames, 0, ctx.state.request.skuId!);
-      let category2_Update = updateCategoryFacet(res[0].category2, catIds, catNames, 1, ctx.state.request.skuId!);
-      let insertionDate_Update = updateInsertionDate(res[0].insertionDate, ctx.state.request.skuId!);
+      let skuIds_Update = updateAllSkuIds(list[0].skuIds!, ctx.state.request.skuId!);
+      let category1_Update = updateCategoryFacet(list[0].category1!, catIds, catNames, 0, ctx.state.request.skuId!);
+      let category2_Update = updateCategoryFacet(list[0].category2!, catIds, catNames, 1, ctx.state.request.skuId!);
+      let insertionDate_Update = updateInsertionDate(list[0].insertionDate, ctx.state.request.skuId!);
 
       //insertion date will change on second insert??
 
-
       //not to update indicies
-      await ctx.clients.Vtex.updateDocumentV2(LIST_ENTITY, res[0].id, {
+      await ctx.clients.Vtex.updateDocumentV2(LIST_ENTITY, list[0].id!, {
         category1: category1_Update,
         category2: category2_Update,
         insertionDate: insertionDate_Update,
@@ -61,21 +55,15 @@ export async function createList(ctx: Context, next: () => Promise<any>) {
 
     }
 
-    //to be removed
-    await wait(1000)
-    let res1 = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${ctx.state.request.listId}`)
-    console.log("res1:", JSON.stringify(res1, null, 2))
-    //END to be removed
+    ctx.status = 200;
+    ctx.body = { created: true }
 
     await next();
 
   } catch (error) {
 
-    console.log("error:", error)
-
-
     ctx.status = 500;
-    ctx.body = stringify(error);
+    ctx.body = JSON.stringify(error);
   }
 
 
@@ -84,7 +72,7 @@ export async function createList(ctx: Context, next: () => Promise<any>) {
 }
 
 
-export function updateCategoryFacet(categories: any, catIds: any, catNames: any, level: number = 0, skuId: string) {
+export function updateCategoryFacet(categories: Category_Field[], catIds: string[], catNames: string[], level: number = 0, skuId: string) {
 
 
   let categorySpecs = categories ? categories : []
@@ -103,6 +91,7 @@ export function updateCategoryFacet(categories: any, catIds: any, catNames: any,
   if (!found) {
     categorySpecs.push({
       label: catNames[level],
+      value: catNames[level].toLowerCase().replaceAll(" ", "-"),
       categoryId: catIds[level],
       fatherCategoryId: level == 1 ? catIds[0] : null,
       skuIds: [skuId]
@@ -156,10 +145,10 @@ export function updateInsertionDate(insertionDates: any, skuId: string) {
   return insertionDates
 }
 
-export function updateAllSkuIds(skuIds: any, skuId: string) {
-  let skuIds_Update = skuIds
+export function updateAllSkuIds(skuIds: string[], skuId: string) {
+  let skuIds_Update: string[] = skuIds;
   if (!skuIds.includes(skuId)) {
-    skuIds_Update.push(skuId)
+    skuIds_Update.push(skuId);
   }
   return skuIds_Update
 }

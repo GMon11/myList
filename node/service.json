@@ -14,24 +14,24 @@
     }
   },
   "routes": {
-    "createList": {
-      "path": "/app/add/products/:email",
-      "public": true
-    },
-    "getFacets": {
-      "path": "/app/retrieve/facets/:email",
-      "public": true
-    },
-    "getProducts": {
-      "path": "/app/retrieve/products/:email",
+    "updateList": {
+      "path": "/app/my-list/product/add",
       "public": true
     },
     "removeProducts": {
-      "path": "/app/remove/products/:email",
+      "path": "/app/my-list/product/remove",
+      "public": true
+    },
+    "getFacets": {
+      "path": "/app/my-list/facets",
+      "public": true
+    },
+    "getProducts": {
+      "path": "/app/my-list/products",
       "public": true
     },
     "ping": {
-      "path": "/_v/private/app/mylist/ping",
+      "path": "/_v/private/app/my-list/ping",
       "public": true
     }
   }

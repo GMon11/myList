@@ -17,7 +17,7 @@ export enum ROUTE {
 }
 
 export const LIST_ENTITY = "prova" //tbm
-export const LIST_FIELDS = "id,name,email,category1,category2,insertionDate,skuIds"
+export const LIST_FIELDS = "id,listId,name,email,category1,category2,insertionDate,skuIds"
 
 export const ALLOWED_FACETS = ["category1", "category2"]
 

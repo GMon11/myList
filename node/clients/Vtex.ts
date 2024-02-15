@@ -89,8 +89,8 @@ export default class Vtex extends JanusClient {
         })
         .catch(async (err) => {
 
-         if(err.response.data.Message == "Field 'email' not found in schema"){
-          resolve({existent: false})
+         if(err.response.data.Message == "Field 'listId' not found in schema"){
+          resolve([{existent: false}])
          }
 
 

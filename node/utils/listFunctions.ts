@@ -1,14 +1,16 @@
+import { SelectedFacets } from "../typings/config";
+import { InsertionDate, ListRecord } from "../typings/md_entities";
 import { MONTH_NAMES_IT, TimeZone } from "./constants";
 import { getLocalDateTime } from "./functions";
 
-export function getProductsList(selectedFacets: any, list: any) {
+export function getProductsList(selectedFacets: SelectedFacets[], list: ListRecord) {
 
   let products: any = []
 
   if (selectedFacets.length > 0) {
 
 
-    selectedFacets.forEach((facet: any) => {
+    selectedFacets.forEach((facet: SelectedFacets) => {
 
       let fProducts: any = []
 
@@ -34,23 +36,23 @@ export function getProductsList(selectedFacets: any, list: any) {
     products = (Array.isArray(products[0])) ? products[0] : products
 
   } else {
-    products = list[0].skuIds;
+    products = list.skuIds!;
   }
 
   return products;
 }
 
-export function getFilteredProducts(facet: any, list: any) {
+export function getFilteredProducts(facet: SelectedFacets, list: any) {
 
   console.log("facet:", facet)
 
   let filteredProducts: any = []
 
-  if (list[0][facet.key]) {
+  if (list[facet.key as keyof typeof list]) {
 
 
-    list[0][facet.key].forEach((item: any) => {
-      if (item.label == facet.value) {
+    list[facet.key as keyof typeof list]?.forEach((item: any) => {
+      if (item.value == facet.value) {
         item.skuIds.forEach((skuId: any) => {
           filteredProducts.push(skuId)
         });
@@ -62,12 +64,12 @@ export function getFilteredProducts(facet: any, list: any) {
 
 }
 
-export function getDateFilteredProducts(facet: any, list: any) {
+export function getDateFilteredProducts(facet: SelectedFacets, list: ListRecord) {
 
   console.log("facet:", facet)
 
 
-  let products: any = []
+  let products: string[] = []
 
   let currentDate = getLocalDateTime(TimeZone.Rome)
 
@@ -76,7 +78,7 @@ export function getDateFilteredProducts(facet: any, list: any) {
 
     console.log("month:", month)
 
-    list[0].insertionDate.forEach((item: any) => {
+    list.insertionDate?.forEach((item: InsertionDate) => {
       let dbMonth = new Date(item.date).getMonth()
       if (month == dbMonth) {
 
@@ -89,7 +91,7 @@ export function getDateFilteredProducts(facet: any, list: any) {
   } else if (facet.value == "last14") {
 
 
-    list[0].insertionDate.forEach((item: any) => {
+    list.insertionDate?.forEach((item: InsertionDate) => {
 
       let dbDate = new Date(item.date);
 
@@ -104,7 +106,7 @@ export function getDateFilteredProducts(facet: any, list: any) {
 
 
   } else if (facet.value == "last7") {
-    list[0].insertionDate.forEach((item: any) => {
+    list.insertionDate?.forEach((item: InsertionDate) => {
 
       let dbDate = new Date(item.date);
 

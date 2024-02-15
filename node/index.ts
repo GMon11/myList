@@ -58,6 +58,7 @@ declare global {
       selectedFacets?: SelectedFacets[],
       first?: number,
       after?: string
+      deleteList?: boolean
     }
   }
 }
@@ -73,14 +74,14 @@ export default new Service({
     ping: method({
       POST: [initLogger, ping]
     }),
-    createList: method({
+    updateList: method({
       POST: [checkRequest, createList]
     }),
     getFacets: method({
-      POST: [getFacets]
+      POST: [checkRequest, getFacets]
     }),
     getProducts: method({
-      POST: [getProducts]
+      POST: [checkRequest, getProducts]
     }),
     removeProducts: method({
       DELETE: [removeProducts]

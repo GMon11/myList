@@ -1,3 +1,5 @@
+import { ListRecord } from "../typings/md_entities";
+import { GetProduct_Response } from "../typings/types";
 import { LIST_ENTITY, LIST_FIELDS } from "../utils/constants";
 import { getProductsList } from "../utils/listFunctions";
 
@@ -7,16 +9,15 @@ export async function getProducts(ctx: Context, next: () => Promise<any>) {
 
 
 
-    let list = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${ctx.state.request.listId}`)
-    if (list.existent == false) {
+    let list: ListRecord[] = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${ctx.state.request.listId}`)
+    if (list[0].existent == false) {
       throw new Error("#notExistentList")
     }
 
 
-    let products: any = getProductsList(ctx.state.request.selectedFacets, list)
+    let products = getProductsList(ctx.state.request.selectedFacets!, list[0])
 
-    ctx.status = 200;
-    ctx.body = {
+    let response: GetProduct_Response = {
       data: {
         products: {
           pageInfo: {
@@ -27,6 +28,9 @@ export async function getProducts(ctx: Context, next: () => Promise<any>) {
       },
       errors: null
     }
+
+    ctx.status = 200;
+    ctx.body = response;
 
 
     await next();
