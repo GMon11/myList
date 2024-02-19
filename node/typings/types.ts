@@ -2,7 +2,7 @@ export interface FacetValue {
   quantity: number,
   label: string,
   value: string,
-  isSelected: boolean
+  selected: boolean
 }
 
 export interface Facet {

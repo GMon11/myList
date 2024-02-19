@@ -27,8 +27,8 @@ export async function createList(ctx: Context, next: () => Promise<any>) {
       let payload: ListRecord = {
         listId: ctx.state.request.listId!,
         skuIds: [ctx.state.request.skuId!],
-        category1: [{ label: catNames[0], value: catNames[0].toLowerCase().replaceAll(" ", "-"), categoryId: catIds[0], skuIds: [ctx.state.request.skuId!] }],
-        category2: [{ label: catNames[1], value: catNames[0].toLowerCase().replaceAll(" ", "-"), categoryId: catIds[1], fatherCategoryId: catIds[0], skuIds: [ctx.state.request.skuId!] }],
+        category1: [{ label: catNames[0], value: catNames[0].toLowerCase().replace(" ", "-"), categoryId: catIds[0], skuIds: [ctx.state.request.skuId!] }],
+        category2: [{ label: catNames[1], value: catNames[1].toLowerCase().replace(" ", "-"), categoryId: catIds[1], fatherCategoryId: catIds[0], skuIds: [ctx.state.request.skuId!] }],
         insertionDate: [{ date: currentDate, skuIds: [ctx.state.request.skuId!] }]
       }
 
@@ -91,7 +91,7 @@ export function updateCategoryFacet(categories: Category_Field[], catIds: string
   if (!found) {
     categorySpecs.push({
       label: catNames[level],
-      value: catNames[level].toLowerCase().replaceAll(" ", "-"),
+      value: catNames[level].toLowerCase().replace(" ", "-"),
       categoryId: catIds[level],
       fatherCategoryId: level == 1 ? catIds[0] : null,
       skuIds: [skuId]

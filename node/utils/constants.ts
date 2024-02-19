@@ -11,15 +11,16 @@ export const SECONDARY_BUCKET = ""
 export const LOGGER_ENTITY = "LC"
 
 export enum ROUTE {
-  CREATE_LIST = "createList",
+  UPDATE_LIST = "updateList",
   FETCH_FACETS = "getFacets",
-  FETCH_PRODUCTS = "getProducts"
+  FETCH_PRODUCTS = "getProducts",
+  REMOVE_PRODUCTS = "removeProducts"
 }
 
 export const LIST_ENTITY = "prova" //tbm
 export const LIST_FIELDS = "id,listId,name,email,category1,category2,insertionDate,skuIds"
 
-export const ALLOWED_FACETS = ["category1", "category2"]
+export const ALLOWED_FACETS = ["category1", "category2", "insertionDate"]
 
 export enum TimeZone {
   Rome = 'Europe/Rome'

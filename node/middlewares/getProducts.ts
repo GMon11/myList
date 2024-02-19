@@ -9,7 +9,7 @@ export async function getProducts(ctx: Context, next: () => Promise<any>) {
 
 
 
-    let list: ListRecord[] = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `email=${ctx.state.request.listId}`)
+    let list: ListRecord[] = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `listId=${ctx.state.request.listId}`)
     if (list[0].existent == false) {
       throw new Error("#notExistentList")
     }

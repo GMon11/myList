@@ -10,7 +10,10 @@ export async function checkRequest(ctx: Context, next: () => Promise<any>) {
 
     ctx.state.request = await json(ctx.req);
 
-    if (ctx.vtex.route.id == ROUTE.CREATE_LIST) {
+    console.log("ctx.state.request:", ctx.state.request)
+
+
+    if (ctx.vtex.route.id == ROUTE.UPDATE_LIST || ctx.vtex.route.id == ROUTE.REMOVE_PRODUCTS) {
       if (!isValid(ctx.state.request) || !isValid(ctx.state.request.skuId)) {
         throw new Error("#notValidRequest");
       }
@@ -18,7 +21,8 @@ export async function checkRequest(ctx: Context, next: () => Promise<any>) {
       ctx.vtex.route.id == ROUTE.FETCH_FACETS ||
       ctx.vtex.route.id == ROUTE.FETCH_PRODUCTS
     ) {
-      if (!isValid(ctx.state.request.listId) || !isValid(ctx.state.request.selectedFacets)) {
+
+      if (!isValid(ctx.state.request.listId) || isValid(ctx.state.request.selectedFacets?.length)) {
         throw new Error("#notValidRequest");
       }
     }
@@ -26,6 +30,7 @@ export async function checkRequest(ctx: Context, next: () => Promise<any>) {
     await next()
 
   } catch (error) {
+
     if (error.message = '#notValidRequest') {
       ctx.status = 400;
       ctx.body = stringify(error);

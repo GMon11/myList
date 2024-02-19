@@ -94,7 +94,7 @@ function getAllValues(facet: string, list: any, selectedFacet: SelectedFacets) {
       quantity: value.skuIds.length,
       label: value.label,
       value: value.value,
-      isSelected: selectedFacet.value == value.label
+      selected: selectedFacet.value == value.value
     })
   });
 
@@ -119,7 +119,7 @@ function getValuesFiltered(facetKey: string, list: any, products: string[]) {
             quantity: list[facetKey][i].skuIds.length,
             label: list[facetKey][i].label,
             value: list[facetKey][i].value,
-            isSelected: false
+            selected: false
           })
           if (facetKey != "insertionDate") {
             found = true;

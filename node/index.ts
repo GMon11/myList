@@ -84,7 +84,7 @@ export default new Service({
       POST: [checkRequest, getProducts]
     }),
     removeProducts: method({
-      DELETE: [removeProducts]
+      DELETE: [checkRequest, removeProducts]
     })
 
   }

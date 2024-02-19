@@ -6,50 +6,43 @@ export async function removeProducts(ctx: Context, next: () => Promise<any>) {
 
   try {
 
-
-
     let list = await ctx.clients.Vtex.searchDocumentV2(LIST_ENTITY, LIST_FIELDS, `listId=${ctx.state.request.listId}`)
 
 
-
-    let updatedList: any = {
-      category1: list[0].category1,
-      category2: list[0].category2
-    }
-
-    console.log("updatedList:", JSON.stringify(updatedList, null, 2))
+    console.log("ctx.state.request.listId:", ctx.state.request.listId)
 
 
+
+    console.log("updatedList:", JSON.stringify(list[0], null, 2))
 
     if (ctx.state.request.deleteList) {
-
       let res = await ctx.clients.Vtex.deleteDocumentV2(LIST_ENTITY, list[0].documentId);
       console.log("res:", res)
-
     } else {
 
 
-      updatedList.skuIds.filter((f: any) => f != ctx.state.request.skuId)
+      list[0].skuIds = list[0].skuIds.filter((f: any) => f != ctx.state.request.skuId)
 
       ALLOWED_FACETS.forEach((facet: any) => {
 
-        updatedList[facet].forEach((it: any) => {
+        list[0][facet].forEach((it: any) => {
           it.skuIds = it.skuIds.filter((f: any) => f != ctx.state.request.skuId)
         });
 
-        updatedList[facet] = updatedList[facet].filter((f: any) => (f.skuIds.length > 0))
+        list[0][facet] = list[0][facet].filter((f: any) => (f.skuIds.length > 0))
 
       })
 
+      console.log("updatedList2:", JSON.stringify(list[0], null, 2))
 
-      let res = await ctx.clients.Vtex.updateDocumentV2(LIST_ENTITY, list[0].id, updatedList)
+
+      let res = await ctx.clients.Vtex.updateDocumentV2(LIST_ENTITY, list[0].id, list[0])
 
       console.log("res:", res)
 
 
     }
 
-    console.log("updatedList2:", JSON.stringify(updatedList, null, 2))
 
 
     ctx.body = {
@@ -60,6 +53,9 @@ export async function removeProducts(ctx: Context, next: () => Promise<any>) {
     await next();
 
   } catch (error) {
+
+    console.log("error:", error)
+
     ctx.status = 500;
     ctx.body = stringify(error)
   }

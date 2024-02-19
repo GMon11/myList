@@ -54,7 +54,7 @@ export function getFilteredProducts(facet: SelectedFacets, list: any) {
     list[facet.key as keyof typeof list]?.forEach((item: any) => {
       if (item.value == facet.value) {
         item.skuIds.forEach((skuId: any) => {
-          filteredProducts.push(skuId)
+          filteredProducts.push(skuId);
         });
       }
     });
@@ -71,18 +71,18 @@ export function getDateFilteredProducts(facet: SelectedFacets, list: ListRecord)
 
   let products: string[] = []
 
-  let currentDate = getLocalDateTime(TimeZone.Rome)
+  let currentDate = getLocalDateTime(TimeZone.Rome);
 
   if (MONTH_NAMES_IT.includes(facet.value)) {
-    let month = MONTH_NAMES_IT.indexOf(facet.value)
+    let month = MONTH_NAMES_IT.indexOf(facet.value);
 
     console.log("month:", month)
 
     list.insertionDate?.forEach((item: InsertionDate) => {
-      let dbMonth = new Date(item.date).getMonth()
+      let dbMonth = new Date(item.date).getMonth();
       if (month == dbMonth) {
 
-        products = item.skuIds
+        products = item.skuIds;
 
         console.log("item.skuIds:", item.skuIds)
 
@@ -99,7 +99,7 @@ export function getDateFilteredProducts(facet: SelectedFacets, list: ListRecord)
       partial.setDate(partial.getDate() - 14);
 
       if (dbDate >= partial) {
-        products = item.skuIds
+        products = item.skuIds;
       }
 
     });
@@ -114,7 +114,7 @@ export function getDateFilteredProducts(facet: SelectedFacets, list: ListRecord)
       partial.setDate(partial.getDate() - 7);
 
       if (dbDate >= partial) {
-        products = item.skuIds
+        products = item.skuIds;
       }
 
     });
@@ -122,6 +122,6 @@ export function getDateFilteredProducts(facet: SelectedFacets, list: ListRecord)
 
   console.log("products:", products)
 
-  return products
+  return products;
 
 }
